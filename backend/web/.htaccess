@@ -1,0 +1,23 @@
+RewriteEngine on
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} !^.(css|js)
+RewriteRule . index.php [PT,L]
+
+RewriteCond %{REQUEST_FILENAME}.gz -f
+RewriteCond %{HTTP:Accept-encoding} gzip
+RewriteCond %{HTTP_USER_AGENT} !Konqueror
+RewriteRule ^(.*)\.(css|js)?$ $1.$2.gz [QSA,L]
+
+<IfModule mod_headers.c>
+        Header append Vary User-Agent
+        <FilesMatch .*\.css\.gz>
+            ForceType text/css
+            Header set Content-Encoding: gzip
+        </FilesMatch>
+        <FilesMatch .*\.js\.gz>
+            ForceType application/javascript
+            Header set Content-Encoding: gzip
+        </FilesMatch>
+</IfModule>
