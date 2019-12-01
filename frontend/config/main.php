@@ -6,7 +6,7 @@ $params = array_merge(
   require __DIR__ . '/params-local.php'
 );
 
-return [
+$config = [
   'id' => 'app-frontend',
   'basePath' => dirname(__DIR__),
   'bootstrap' => ['log'],
@@ -48,3 +48,20 @@ return [
   ],
   'params' => $params,
 ];
+
+if (!YII_ENV_TEST) {
+  // configuration adjustments for 'dev' environment
+  $config['bootstrap'][] = 'debug';
+  $config['modules']['debug'] = [
+    'class' => 'yii\debug\Module',
+    "allowedIPs" => ["*"]
+  ];
+
+  $config['bootstrap'][] = 'gii';
+  $config['modules']['gii'] = [
+    'class' => 'yii\gii\Module',
+    "allowedIPs" => ["*"]
+  ];
+}
+
+return $config;

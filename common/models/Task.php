@@ -3,6 +3,8 @@
 namespace common\models;
 
 use Yii;
+use yii\behaviors\BlameableBehavior;
+use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the model class for table "task".
@@ -25,80 +27,92 @@ use Yii;
  */
 class Task extends \yii\db\ActiveRecord
 {
-    /**
-     * {@inheritdoc}
-     */
-    public static function tableName()
-    {
-        return 'task';
-    }
+  public function behaviors()
+  {
+    return [
+      TimestampBehavior::class,
+      [
+        "class" => BlameableBehavior::class,
+        "createdByAttribute" => "creator_id",
+        "updatedByAttribute" => "updater_id"
+      ]
+    ];
+  }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function rules()
-    {
-        return [
-            [['title', 'creator_id', 'created_at'], 'required'],
-            [['description'], 'string'],
-            [['project_id', 'executor_id', 'started_at', 'completed_at', 'creator_id', 'updater_id', 'created_at', 'updated_at'], 'integer'],
-            [['title'], 'string', 'max' => 255],
-            [['executor_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['executor_id' => 'id']],
-            [['creator_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['creator_id' => 'id']],
-            [['updater_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['updater_id' => 'id']],
-        ];
-    }
+  /**
+   * {@inheritdoc}
+   */
+  public static function tableName()
+  {
+    return 'task';
+  }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function attributeLabels()
-    {
-        return [
-            'id' => 'ID',
-            'title' => 'Title',
-            'description' => 'Description',
-            'project_id' => 'Project ID',
-            'executor_id' => 'Executor ID',
-            'started_at' => 'Started At',
-            'completed_at' => 'Completed At',
-            'creator_id' => 'Creator ID',
-            'updater_id' => 'Updater ID',
-            'created_at' => 'Created At',
-            'updated_at' => 'Updated At',
-        ];
-    }
+  /**
+   * {@inheritdoc}
+   */
+  public function rules()
+  {
+    return [
+      [['title'], 'required'],
+      [['description'], 'string'],
+      [['project_id', 'executor_id', 'started_at', 'completed_at', 'creator_id', 'updater_id', 'created_at', 'updated_at'], 'integer'],
+      [['title'], 'string', 'max' => 255],
+      [['executor_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['executor_id' => 'id']],
+      [['creator_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['creator_id' => 'id']],
+      [['updater_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['updater_id' => 'id']],
+    ];
+  }
 
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getExecutor()
-    {
-        return $this->hasOne(User::className(), ['id' => 'executor_id']);
-    }
+  /**
+   * {@inheritdoc}
+   */
+  public function attributeLabels()
+  {
+    return [
+      'id' => 'ID',
+      'title' => 'Title',
+      'description' => 'Description',
+      'project_id' => 'Project ID',
+      'executor_id' => 'Executor ID',
+      'started_at' => 'Started At',
+      'completed_at' => 'Completed At',
+      'creator_id' => 'Creator ID',
+      'updater_id' => 'Updater ID',
+      'created_at' => 'Created At',
+      'updated_at' => 'Updated At',
+    ];
+  }
 
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getCreator()
-    {
-        return $this->hasOne(User::className(), ['id' => 'creator_id']);
-    }
+  /**
+   * @return \yii\db\ActiveQuery
+   */
+  public function getExecutor()
+  {
+    return $this->hasOne(User::className(), ['id' => 'executor_id']);
+  }
 
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getUpdater()
-    {
-        return $this->hasOne(User::className(), ['id' => 'updater_id']);
-    }
+  /**
+   * @return \yii\db\ActiveQuery
+   */
+  public function getCreator()
+  {
+    return $this->hasOne(User::className(), ['id' => 'creator_id']);
+  }
 
-    /**
-     * {@inheritdoc}
-     * @return \common\models\query\TaskQuery the active query used by this AR class.
-     */
-    public static function find()
-    {
-        return new \common\models\query\TaskQuery(get_called_class());
-    }
+  /**
+   * @return \yii\db\ActiveQuery
+   */
+  public function getUpdater()
+  {
+    return $this->hasOne(User::className(), ['id' => 'updater_id']);
+  }
+
+  /**
+   * {@inheritdoc}
+   * @return \common\models\query\TaskQuery the active query used by this AR class.
+   */
+  public static function find()
+  {
+    return new \common\models\query\TaskQuery(get_called_class());
+  }
 }

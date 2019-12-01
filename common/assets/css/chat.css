@@ -1,0 +1,26 @@
+.messages-menu .dropdown-menu label {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+}
+
+.messages-menu .dropdown-menu label input {
+  width: 60%;
+  padding: 5px 10px;
+}
+
+.messages-menu .dropdown-menu label .button-send-message {
+  width: 30%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 5px 10px;
+  border: 1px solid #3c8dbc;
+  text-transform: uppercase;
+}
+
+.messages-menu .dropdown-menu label .button-send-message:hover {
+  cursor: pointer;
+}
