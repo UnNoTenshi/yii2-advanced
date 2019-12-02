@@ -1,15 +1,3 @@
-function getUsername() {
-  var element = document.querySelector('.dropdown.user.user-menu .dropdown-toggle span');
-
-  var username = 'Guest';
-
-  if (element && element.textContent.length > 0) {
-    username = element.textContent;
-  }
-
-  return username
-}
-
 function getBodyChat() {
   return document.querySelector('.dropdown.messages-menu');
 }
@@ -52,7 +40,7 @@ function sendMessageToChat() {
 
     if (message.length > 0) {
       var objectMessage = {
-        username: getUsername(),
+        username: username,
         message: message
       };
 

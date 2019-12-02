@@ -21,9 +21,13 @@ use yii\behaviors\TimestampBehavior;
  * @property User $creator
  * @property User $updater
  * @property ProjectUser[] $projectUsers
+ *
+ * @property Task[] $tasks
  */
 class Project extends \yii\db\ActiveRecord
 {
+  const RELATION_TASKS = 'tasks';
+
   public function behaviors()
   {
     return [
@@ -57,6 +61,10 @@ class Project extends \yii\db\ActiveRecord
       [['creator_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['creator_id' => 'id']],
       [['updater_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['updater_id' => 'id']],
     ];
+  }
+
+  public function getTasks() {
+    return $this->hasMany(Task::class, ["project_id" => "id"]);
   }
 
   /**

@@ -15,6 +15,9 @@ $config = [
     'request' => [
       'csrfParam' => '_csrf-frontend',
       'cookieValidationKey' => 'xxxxxxx',
+      "parsers" => [
+        "application/json" => "yii\web\JsonParser"
+      ]
     ],
     'user' => [
       'identityClass' => 'common\models\User',
@@ -42,10 +45,18 @@ $config = [
       'enablePrettyUrl' => true,
       'showScriptName' => false,
       'rules' => [
+        ['class' => \yii\rest\UrlRule::class, "controller" => ["api/task", "api/project"]]
       ],
     ],
 
   ],
+
+  "modules" => [
+    "api" => [
+      "class" => "frontend\modules\api\Module"
+    ]
+  ],
+
   'params' => $params,
 ];
 
