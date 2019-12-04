@@ -228,7 +228,6 @@ function updateTimeInBlocksMessage() {
 }
 
 function addNewMessageToBodyViewMessages(objectMessage) {
-  console.log(objectMessage);
   var bodyViewMessages = getBodyViewMessages();
 
   if (bodyViewMessages) {
@@ -251,7 +250,7 @@ function getNewBlockMessage(objectMessage) {
   pullLeft.classList.add('pull-left');
 
   var imgAvatar = document.createElement('img');
-  imgAvatar.setAttribute('src', '/assets/99f32e21/img/user2-160x160.jpg');
+  imgAvatar.setAttribute('src', avatar);
   imgAvatar.classList.add('img-circle');
 
   pullLeft.appendChild(imgAvatar);

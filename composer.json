@@ -19,7 +19,9 @@
         "yiisoft/yii2-bootstrap": "~2.0.0",
         "yiisoft/yii2-swiftmailer": "~2.0.0 || ~2.1.0",
         "dmstr/yii2-adminlte-asset": "2.6.2",
-        "cboden/ratchet": "v0.4.1"
+        "cboden/ratchet": "v0.4.1",
+        "mohorev/yii2-upload-behavior": "0.2.1",
+        "yiisoft/yii2-imagine": "2.2.0"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.1.0",
