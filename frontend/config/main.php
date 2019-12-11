@@ -1,4 +1,8 @@
 <?php
+
+use yii\web\User;
+use yii\web\UserEvent;
+
 $params = array_merge(
   require __DIR__ . '/../../common/config/params.php',
   require __DIR__ . '/../../common/config/params-local.php',
@@ -23,6 +27,9 @@ $config = [
       'identityClass' => 'common\models\User',
       'enableAutoLogin' => true,
       'identityCookie' => ['name' => '_identity-frontend', 'httpOnly' => true],
+      'on ' . User::EVENT_AFTER_LOGIN => function(UserEvent $event) {
+        Yii::info(\common\models\User::findOne($event->identity->getId())->username . ' is login in front', 'auth');
+      }
     ],
     'session' => [
       // this is the name of the session cookie used for login on the frontend
@@ -34,6 +41,12 @@ $config = [
         [
           'class' => 'yii\log\FileTarget',
           'levels' => ['error', 'warning'],
+        ],
+        [
+          'class' => 'yii\log\FileTarget',
+          'categories' => ['auth'],
+          'logFile' => '@runtime/logs/authorizations.log',
+          'logVars' => []
         ],
       ],
     ],

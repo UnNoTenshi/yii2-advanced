@@ -57,6 +57,7 @@ class User extends ActiveRecord implements IdentityInterface
   const RELATION_UPDATED_TASKS = "updatedTasks";
   const RELATION_CREATED_PROJECTS = "createdProjects";
   const RELATION_UPDATED_PROJECTS = "updatedProjects";
+  const RELATION_PROJECTS_USER = "projectUsers";
 
   const SCENARIO_CREATE = "create";
   const SCENARIO_UPDATE = "update";
@@ -151,6 +152,11 @@ class User extends ActiveRecord implements IdentityInterface
   public function getUpdatedProjects()
   {
     return $this->hasMany(Project::class, ["updater_id" => "id"]);
+  }
+
+  public function getProjectsUser()
+  {
+    return $this->hasMany(ProjectUser::class, ['user_id' => 'id']);
   }
 
   /**

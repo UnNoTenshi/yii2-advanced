@@ -2,10 +2,14 @@
 
 namespace backend\controllers;
 
+use common\models\ProjectUser;
+use common\models\User;
 use Yii;
 use common\models\Project;
 use common\models\search\ProjectSearch;
+use yii\data\ActiveDataProvider;
 use yii\filters\AccessControl;
+use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -62,8 +66,15 @@ class ProjectController extends Controller
    */
   public function actionView($id)
   {
+    $model = $this->findModel($id);
+
+    $dataProvider = new ActiveDataProvider([
+      "query" => Project::findOne($id)->getProjectUsers()
+    ]);
+
     return $this->render('view', [
-      'model' => $this->findModel($id),
+      'dataProvider' => $dataProvider,
+      'model' => $model,
     ]);
   }
 
@@ -76,12 +87,13 @@ class ProjectController extends Controller
   {
     $model = new Project();
 
-    if ($model->load(Yii::$app->request->post()) && $model->save()) {
+    if ($this->loadModel($model) && $model->save()) {
       return $this->redirect(['view', 'id' => $model->id]);
     }
 
     return $this->render('create', [
       'model' => $model,
+      'users' => $model->getUsersToProject()
     ]);
   }
 
@@ -96,12 +108,13 @@ class ProjectController extends Controller
   {
     $model = $this->findModel($id);
 
-    if ($model->load(Yii::$app->request->post()) && $model->save()) {
+    if ($this->loadModel($model) && $model->save()) {
       return $this->redirect(['view', 'id' => $model->id]);
     }
 
     return $this->render('update', [
       'model' => $model,
+      'users' => $model->getUsersToProject()
     ]);
   }
 
@@ -115,6 +128,8 @@ class ProjectController extends Controller
   public function actionDelete($id)
   {
     $this->findModel($id)->delete();
+
+    ProjectUser::deleteAll(['project_id' => $id]);
 
     return $this->redirect(['index']);
   }
@@ -133,5 +148,16 @@ class ProjectController extends Controller
     }
 
     throw new NotFoundHttpException('The requested page does not exist.');
+  }
+
+  private function loadModel(Project $model) {
+    $data = Yii::$app->request->post($model->formName());
+    $projectUsers = $data[Project::RELATION_PROJECT_USERS] ?? null;
+
+    if ($projectUsers !== null) {
+      $model->projectUsers = $projectUsers === '' ? [] : $projectUsers;
+    }
+
+    return $model->load(Yii::$app->request->post());
   }
 }

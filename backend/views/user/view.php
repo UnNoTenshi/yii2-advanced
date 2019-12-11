@@ -1,13 +1,15 @@
 <?php
 
+use common\models\Project;
 use common\models\User;
+use yii\grid\GridView;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\User */
 
-$this->title = $model->id;
+$this->title = $model->username;
 $this->params['breadcrumbs'][] = ['label' => 'Users', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
@@ -55,4 +57,28 @@ $this->params['breadcrumbs'][] = $this->title;
     ],
   ]) ?>
 
+  <?= GridView::widget([
+    'dataProvider' => $dataProvider,
+    'columns' => [
+      ['class' => 'yii\grid\SerialColumn'],
+      [
+        'attribute' => 'title',
+        'value' => function ($model) {
+          return Project::findOne($model->project_id)->title;
+        }
+      ],
+      'role',
+      [
+        'class' => 'yii\grid\ActionColumn',
+        'template' => '{view}',
+        'buttons' => [
+          'view' => function ($url, $model) {
+            $iconView = \yii\bootstrap\Html::icon('eye-open');
+            return Html::a($iconView, ['/project/view/', 'id' => $model->project_id]);
+          }
+        ]
+      ]
+    ]
+  ])
+  ?>
 </div>

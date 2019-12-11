@@ -2,9 +2,11 @@
 
 namespace common\models;
 
+use lhs\Yii2SaveRelationsBehavior\SaveRelationsBehavior;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "project".
@@ -13,10 +15,13 @@ use yii\behaviors\TimestampBehavior;
  * @property string $title
  * @property string $description
  * @property int $active
+ * @property string $creator_username
  * @property int $creator_id
+ * @property string $updater_username
  * @property int|null $updater_id
  * @property int $created_at
  * @property int|null $updated_at
+ * @property int|null $completed_at
  *
  * @property User $creator
  * @property User $updater
@@ -26,7 +31,26 @@ use yii\behaviors\TimestampBehavior;
  */
 class Project extends \yii\db\ActiveRecord
 {
+  const RELATION_USERS = 'users';
   const RELATION_TASKS = 'tasks';
+  const RELATION_PROJECT_USERS = 'projectUsers';
+
+  const STATUS_INACTIVE = 0;
+  const STATUS_ACTIVE = 1;
+
+  const STATUSES = [
+    self::STATUS_INACTIVE,
+    self::STATUS_ACTIVE
+  ];
+
+  const STATUSES_LABELS = [
+    self::STATUS_INACTIVE => "Неактивный",
+    self::STATUS_ACTIVE => "Активный"
+  ];
+
+  public $creator_username;
+  public $updater_username;
+  public $completed_at;
 
   public function behaviors()
   {
@@ -36,6 +60,12 @@ class Project extends \yii\db\ActiveRecord
         "class" => BlameableBehavior::class,
         "createdByAttribute" => "creator_id",
         "updatedByAttribute" => "updater_id"
+      ],
+      'saveRelations' => [
+        'class' => SaveRelationsBehavior::class,
+        'relations' => [
+          self::RELATION_PROJECT_USERS,
+        ]
       ]
     ];
   }
@@ -56,7 +86,8 @@ class Project extends \yii\db\ActiveRecord
     return [
       [['title', 'description'], 'required'],
       [['description'], 'string'],
-      [['active', 'creator_id', 'updater_id', 'created_at', 'updated_at'], 'integer'],
+      [['active'], 'in', 'range' => self::STATUSES],
+      [['active', 'completed_at'], 'integer'],
       [['title'], 'string', 'max' => 255],
       [['creator_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['creator_id' => 'id']],
       [['updater_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['updater_id' => 'id']],
@@ -84,12 +115,20 @@ class Project extends \yii\db\ActiveRecord
     ];
   }
 
+  public function getCreatorUsername() {
+    return $this->getCreator()->one()->username;
+  }
+
   /**
    * @return \yii\db\ActiveQuery
    */
   public function getCreator()
   {
     return $this->hasOne(User::className(), ['id' => 'creator_id']);
+  }
+
+  public function getUpdaterUsername() {
+    return $this->getUpdater()->one()->username;
   }
 
   /**
@@ -108,6 +147,10 @@ class Project extends \yii\db\ActiveRecord
     return $this->hasMany(ProjectUser::className(), ['project_id' => 'id']);
   }
 
+  public function getUsers() {
+    return $this->hasMany(User::class, ['id' => 'user_id'])->via(self::RELATION_PROJECT_USERS);
+  }
+
   /**
    * {@inheritdoc}
    * @return \common\models\query\ProjectQuery the active query used by this AR class.
@@ -115,5 +158,16 @@ class Project extends \yii\db\ActiveRecord
   public static function find()
   {
     return new \common\models\query\ProjectQuery(get_called_class());
+  }
+
+  public function getUsersToProject() {
+    $users = User::find()
+      ->select(['id', 'username'])
+      ->where(['<>', 'id', Yii::$app->getUser()->id])
+      ->andWhere(['status' => User::STATUS_ACTIVE])
+      ->asArray()
+      ->all();
+
+    return ArrayHelper::map($users, 'id', 'username');
   }
 }

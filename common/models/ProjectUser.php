@@ -17,63 +17,79 @@ use Yii;
  */
 class ProjectUser extends \yii\db\ActiveRecord
 {
-    /**
-     * {@inheritdoc}
-     */
-    public static function tableName()
-    {
-        return 'project_user';
-    }
+  const ROLE_MANAGER = 'manager';
+  const ROLE_DEVELOPER = 'developer';
+  const ROLE_TESTER = 'tester';
 
-    /**
-     * {@inheritdoc}
-     */
-    public function rules()
-    {
-        return [
-            [['project_id', 'user_id'], 'required'],
-            [['project_id', 'user_id'], 'integer'],
-            [['role'], 'string'],
-            [['project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::className(), 'targetAttribute' => ['project_id' => 'id']],
-            [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
-        ];
-    }
+  const ROLES_LABELS = [
+    self::ROLE_MANAGER => 'Manager',
+    self::ROLE_DEVELOPER => 'Developer',
+    self::ROLE_TESTER => 'Tester'
+  ];
 
-    /**
-     * {@inheritdoc}
-     */
-    public function attributeLabels()
-    {
-        return [
-            'id' => 'ID',
-            'project_id' => 'Project ID',
-            'user_id' => 'User ID',
-            'role' => 'Role',
-        ];
-    }
+  const ROLES = [
+    self::ROLE_MANAGER,
+    self::ROLE_DEVELOPER,
+    self::ROLE_TESTER
+  ];
 
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getProject()
-    {
-        return $this->hasOne(Project::className(), ['id' => 'project_id']);
-    }
+  /**
+   * {@inheritdoc}
+   */
+  public static function tableName()
+  {
+    return 'project_user';
+  }
 
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getUser()
-    {
-        return $this->hasOne(User::className(), ['id' => 'user_id']);
-    }
+  /**
+   * {@inheritdoc}
+   */
+  public function rules()
+  {
+    return [
+      [['project_id', 'user_id'], 'required'],
+      [['project_id', 'user_id'], 'integer'],
+      [['role'], 'in', 'range' => self::ROLES],
+      [['project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::className(), 'targetAttribute' => ['project_id' => 'id']],
+      [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
+    ];
+  }
 
-    /**
-     * {@inheritdoc}
-     * @return \common\models\query\ProjectUserQuery the active query used by this AR class.
-     */
-    public static function find()
-    {
-        return new \common\models\query\ProjectUserQuery(get_called_class());
-    }
+  /**
+   * {@inheritdoc}
+   */
+  public function attributeLabels()
+  {
+    return [
+      'id' => 'ID',
+      'project_id' => 'Project ID',
+      'user_id' => 'User ID',
+      'role' => 'Role',
+    ];
+  }
+
+  /**
+   * @return \yii\db\ActiveQuery
+   */
+  public function getProject()
+  {
+    return $this->hasOne(Project::className(), ['id' => 'project_id']);
+  }
+
+  /**
+   * @return \yii\db\ActiveQuery
+   */
+  public function getUser()
+  {
+    return $this->hasOne(User::className(), ['id' => 'user_id']);
+  }
+
+  /**
+   * {@inheritdoc}
+   * @return \common\models\query\ProjectUserQuery the active query used by this AR class.
+   */
+  public static function find()
+  {
+    return new \common\models\query\ProjectUserQuery(get_called_class());
+  }
 }
