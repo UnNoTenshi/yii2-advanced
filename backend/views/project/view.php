@@ -13,6 +13,7 @@ $this->title = $model->title;
 $this->params['breadcrumbs'][] = ['label' => 'Projects', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
+
 ?>
 <div class="project-view">
 
@@ -44,13 +45,13 @@ $this->params['breadcrumbs'][] = $this->title;
       [
         'attribute' => 'creator',
         'value' => function (\common\models\Project $model) {
-          return $model->getCreatorUsername();
+          return $model->creator->username;
         }
       ],
       [
         'attribute' => 'updater',
         'value' => function (\common\models\Project $model) {
-          return $model->getUpdaterUsername();
+          return $model->updater->username;
         }
       ],
     ],
@@ -63,8 +64,8 @@ $this->params['breadcrumbs'][] = $this->title;
         ['class' => 'yii\grid\SerialColumn'],
         [
           'attribute' => 'username',
-          'value' => function ($model) {
-            return User::findOne($model->user_id)->username;
+          'value' => function($model) {
+            return $model->user->username;
           }
         ],
         'role',

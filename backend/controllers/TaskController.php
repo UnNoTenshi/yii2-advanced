@@ -2,6 +2,7 @@
 
 namespace backend\controllers;
 
+use console\controllers\RbacController;
 use Yii;
 use common\models\Task;
 use common\models\search\TaskSearch;
@@ -26,7 +27,7 @@ class TaskController extends Controller
         "rules" => [
           [
             "allow" => true,
-            "roles" => ["@"]
+            "roles" => [RbacController::ROLE_ADMIN]
           ]
         ]
       ],

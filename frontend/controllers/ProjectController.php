@@ -2,9 +2,13 @@
 
 namespace frontend\controllers;
 
+use common\models\ProjectUser;
+use common\models\User;
 use Yii;
 use common\models\Project;
 use common\models\search\ProjectSearch;
+use yii\data\ActiveDataProvider;
+use yii\data\ArrayDataProvider;
 use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -46,7 +50,9 @@ class ProjectController extends Controller
   public function actionIndex()
   {
     $searchModel = new ProjectSearch();
-    $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+    $dataProvider = new ActiveDataProvider([
+      "query" => User::findOne(Yii::$app->getUser()->getId())->getProjects()
+    ]);
 
     return $this->render('index', [
       'searchModel' => $searchModel,
@@ -62,9 +68,20 @@ class ProjectController extends Controller
    */
   public function actionView($id)
   {
-    return $this->render('view', [
-      'model' => $this->findModel($id),
-    ]);
+    $model = $this->findModel($id);
+
+    if ($model->isUserInProject()) {
+      $dataProvider = new ArrayDataProvider([
+        "models" => Project::findOne($id)->projectUsers
+      ]);
+
+      return $this->render('view', [
+        'dataProvider' => $dataProvider,
+        'model' => $model,
+      ]);
+    }
+
+    return $this->redirect('index');
   }
 
   /**
@@ -77,11 +94,20 @@ class ProjectController extends Controller
     $model = new Project();
 
     if ($model->load(Yii::$app->request->post()) && $model->save()) {
+      $projectUser = new ProjectUser([
+        "user_id" => Yii::$app->getUser()->getId(),
+        "project_id" => $model->id,
+        "role" => "manager"
+      ]);
+
+      $projectUser->save();
+
       return $this->redirect(['view', 'id' => $model->id]);
     }
 
     return $this->render('create', [
       'model' => $model,
+      'users' => $model->getUsersToProject()
     ]);
   }
 
@@ -96,13 +122,17 @@ class ProjectController extends Controller
   {
     $model = $this->findModel($id);
 
-    if ($model->load(Yii::$app->request->post()) && $model->save()) {
-      return $this->redirect(['view', 'id' => $model->id]);
+    if ($model->isUserInProject()) {
+      if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        return $this->redirect(['view', 'id' => $model->id]);
+      }
+
+      return $this->render('update', [
+        'model' => $model,
+      ]);
     }
 
-    return $this->render('update', [
-      'model' => $model,
-    ]);
+    return $this->redirect('index');
   }
 
   /**
@@ -114,7 +144,10 @@ class ProjectController extends Controller
    */
   public function actionDelete($id)
   {
-    $this->findModel($id)->delete();
+    $model = $this->findModel($id);
+    if ($model->isUserManagerInProject()) {
+      $model->delete();
+    }
 
     return $this->redirect(['index']);
   }

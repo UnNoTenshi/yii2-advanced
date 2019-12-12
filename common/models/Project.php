@@ -25,6 +25,7 @@ use yii\helpers\ArrayHelper;
  *
  * @property User $creator
  * @property User $updater
+ * @property User[] $users
  * @property ProjectUser[] $projectUsers
  *
  * @property Task[] $tasks
@@ -115,20 +116,12 @@ class Project extends \yii\db\ActiveRecord
     ];
   }
 
-  public function getCreatorUsername() {
-    return $this->getCreator()->one()->username;
-  }
-
   /**
    * @return \yii\db\ActiveQuery
    */
   public function getCreator()
   {
     return $this->hasOne(User::className(), ['id' => 'creator_id']);
-  }
-
-  public function getUpdaterUsername() {
-    return $this->getUpdater()->one()->username;
   }
 
   /**
@@ -145,10 +138,6 @@ class Project extends \yii\db\ActiveRecord
   public function getProjectUsers()
   {
     return $this->hasMany(ProjectUser::className(), ['project_id' => 'id']);
-  }
-
-  public function getUsers() {
-    return $this->hasMany(User::class, ['id' => 'user_id'])->via(self::RELATION_PROJECT_USERS);
   }
 
   /**
@@ -169,5 +158,24 @@ class Project extends \yii\db\ActiveRecord
       ->all();
 
     return ArrayHelper::map($users, 'id', 'username');
+  }
+
+  public function getUsersData() {
+    return ArrayHelper::map($this->getProjectUsers()->asArray()->all(), 'user_id', 'role');
+  }
+
+  public function isUserInProject() {
+    return ArrayHelper::isIn(Yii::$app->getUser()->getId(), ArrayHelper::map($this->projectUsers, 'id', 'user_id'));
+  }
+
+  public function isUserManagerInProject() {
+    if ($this->isUserInProject()) {
+      return ProjectUser::findOne([
+        "user_id" => Yii::$app->getUser()->getId(),
+        "project_id" => $this->id
+      ])->role === ProjectUser::ROLE_MANAGER;
+    }
+
+    return false;
   }
 }

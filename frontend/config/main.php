@@ -58,7 +58,12 @@ $config = [
       'enablePrettyUrl' => true,
       'showScriptName' => false,
       'rules' => [
-        ['class' => \yii\rest\UrlRule::class, "controller" => ["api/task", "api/project"]]
+        ['class' => \yii\rest\UrlRule::class, "controller" => ["api/task", "api/project"]],
+        'users' => 'user/index',
+        'user/<id:\d+>' => 'user/view',
+        'profile' => 'user/profile',
+        'projects' => 'project/index',
+        'project/<id:\d+>' => 'project/view',
       ],
     ],
 

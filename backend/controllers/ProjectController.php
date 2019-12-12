@@ -4,10 +4,12 @@ namespace backend\controllers;
 
 use common\models\ProjectUser;
 use common\models\User;
+use console\controllers\RbacController;
 use Yii;
 use common\models\Project;
 use common\models\search\ProjectSearch;
 use yii\data\ActiveDataProvider;
+use yii\data\ArrayDataProvider;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\web\Controller;
@@ -30,7 +32,7 @@ class ProjectController extends Controller
         "rules" => [
           [
             "allow" => true,
-            "roles" => ["@"]
+            "roles" => [RbacController::ROLE_ADMIN]
           ]
         ]
       ],
@@ -68,8 +70,8 @@ class ProjectController extends Controller
   {
     $model = $this->findModel($id);
 
-    $dataProvider = new ActiveDataProvider([
-      "query" => Project::findOne($id)->getProjectUsers()
+    $dataProvider = new ArrayDataProvider([
+      "models" => Project::findOne($id)->projectUsers
     ]);
 
     return $this->render('view', [
@@ -88,6 +90,14 @@ class ProjectController extends Controller
     $model = new Project();
 
     if ($this->loadModel($model) && $model->save()) {
+      $projectUser = new ProjectUser([
+        "user_id" => Yii::$app->getUser()->getId(),
+        "project_id" => $model->id,
+        "role" => "manager"
+      ]);
+
+      $projectUser->save();
+
       return $this->redirect(['view', 'id' => $model->id]);
     }
 
@@ -108,7 +118,15 @@ class ProjectController extends Controller
   {
     $model = $this->findModel($id);
 
+    $projectUsers = $model->getUsersData();
+
     if ($this->loadModel($model) && $model->save()) {
+      if ($diffRoles = array_diff_assoc($model->getUsersData(), $projectUsers)) {
+        foreach ($diffRoles as $userId => $diffRole) {
+          Yii::$app->projectService->assignRole($model, User::findOne($userId), $diffRole);
+        }
+      }
+
       return $this->redirect(['view', 'id' => $model->id]);
     }
 

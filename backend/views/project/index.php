@@ -40,13 +40,13 @@ $this->params['breadcrumbs'][] = $this->title;
       [
         "attribute" => "creator_username",
         "value" => function (\common\models\Project $model) {
-          return $model->getCreatorUsername();
+          return $model->creator->username;
         }
       ],
       [
         "attribute" => "updater_username",
         "value" => function (\common\models\Project $model) {
-          return $model->getUpdaterUsername();
+          return $model->updater->username;
         }
       ],
 

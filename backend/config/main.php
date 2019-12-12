@@ -25,7 +25,7 @@ return [
       'enableAutoLogin' => true,
       'identityCookie' => ['name' => '_identity-backend', 'httpOnly' => true],
       'on ' . User::EVENT_AFTER_LOGIN => function(UserEvent $event) {
-        Yii::info(\common\models\User::findOne($event->identity->getId())->username . ' is login in back', 'auth');
+        Yii::info($event->identity->username . ' is login in back', 'auth');
       }
     ],
     'session' => [
@@ -55,6 +55,11 @@ return [
       'enablePrettyUrl' => true,
       'showScriptName' => false,
       'rules' => [
+        'users' => 'user/index',
+        'user/<id:\d+>' => 'user/view',
+        'profile' => 'user/profile',
+        'projects' => 'project/index',
+        'project/<id:\d+>' => 'project/view',
       ],
     ],
 

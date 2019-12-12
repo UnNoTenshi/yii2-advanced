@@ -2,6 +2,7 @@
 
 namespace backend\controllers;
 
+use console\controllers\RbacController;
 use Yii;
 use common\models\User;
 use common\models\search\UserSearch;
@@ -27,7 +28,7 @@ class UserController extends Controller
         "rules" => [
           [
             "allow" => true,
-            "roles" => ["@"]
+            "roles" => [RbacController::ROLE_ADMIN]
           ]
         ]
       ],
@@ -103,6 +104,21 @@ class UserController extends Controller
   public function actionUpdate($id)
   {
     $model = $this->findModel($id);
+
+    $model->setScenario(User::SCENARIO_UPDATE);
+
+    if ($model->load(Yii::$app->request->post()) && $model->save()) {
+      return $this->redirect(['view', 'id' => $model->id]);
+    }
+
+    return $this->render('update', [
+      'model' => $model,
+    ]);
+  }
+
+  public function actionProfile()
+  {
+    $model = $this->findModel(Yii::$app->getUser()->getId());
 
     $model->setScenario(User::SCENARIO_UPDATE);
 

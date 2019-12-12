@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use console\controllers\RbacController;
 use Yii;
 use common\models\Task;
 use common\models\search\TaskSearch;
